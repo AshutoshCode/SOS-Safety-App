@@ -82,3 +82,10 @@ coverage/
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+# Custom Ignores for Alternatives
+android-native/.gradle/
+android-native/build/
+android-native/*/build/
+sos-web/node_modules/
+sos-web/dist/
+.claude/
