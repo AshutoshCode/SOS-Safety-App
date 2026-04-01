@@ -1,0 +1,17 @@
+{
+  "name": "silent-emergency-alert-demo",
+  "version": "1.0.0",
+  "description": "Silent Emergency Alert System - Web Demo (No Firebase needed)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "emergency",
+    "alert",
+    "demo"
+  ],
+  "author": "",
+  "license": "MIT"
+}

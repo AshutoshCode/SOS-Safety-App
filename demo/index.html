@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silent Emergency Alert - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: white;
+            border-radius: 40px;
+            border: 12px solid #000;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .status-bar {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 12px;
+            padding-top: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .screen {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Auth Screen */
+        .auth-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .auth-screen h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .auth-screen p {
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Home Screen */
+        .home-screen {
+            justify-content: space-between;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .sos-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .sos-button {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff4757 0%, #ee5a6f 100%);
+            border: none;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 71, 87, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            user-select: none;
+            position: relative;
+        }
+
+        .sos-button:hover {
+            box-shadow: 0 15px 40px rgba(255, 71, 87, 0.5);
+        }
+
+        .sos-button.pressed {
+            animation: pulse 0.6s ease-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 30px rgba(255, 71, 87, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+            }
+        }
+
+        .sos-text {
+            font-size: 12px;
+            margin-top: 10px;
+            color: #999;
+            text-align: center;
+        }
+
+        .info-box {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .alert-status {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .alert-status h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Confirmation Dialog */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 300px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 {
+            color: #ff4757;
+            margin-bottom: 10px;
+            font-size: 22px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-confirm {
+            background: #ff4757;
+            color: white;
+        }
+
+        /* Alert Details Screen */
+        .alert-details {
+            justify-content: flex-start;
+        }
+
+        .alert-details h2 {
+            color: #ff4757;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .detail-card h4 {
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .detail-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        .contacts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .contact-item::before {
+            content: '✓';
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .location-log {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .location-item {
+            font-size: 12px;
+            color: #666;
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📡 Demo Mode</span>
+        </div>
+
+        <!-- Auth Screen -->
+        <div class="screen auth-screen active" id="authScreen">
+            <h1>🚨 Emergency Alert</h1>
+            <p>Secure emergency response system</p>
+            <div class="input-group">
+                <input type="tel" id="phoneInput" placeholder="Enter phone number" value="+91 9876543210">
+                <button class="btn" onclick="login()">Sign In</button>
+            </div>
+            <div style="text-align: left; color: #999; font-size: 12px; margin-top: 20px;">
+                <p><strong>Demo Mode:</strong> No Firebase needed</p>
+                <p>• Enter any phone number</p>
+                <p>• Press SOS to trigger alert</p>
+                <p>• View live updates</p>
+            </div>
+        </div>
+
+        <!-- Home Screen -->
+        <div class="screen" id="homeScreen">
+            <div class="header">
+                <h1>Stay Safe</h1>
+                <p id="userPhone"></p>
+            </div>
+
+            <div class="sos-container">
+                <div class="info-box">
+                    Press and hold to trigger emergency alert
+                </div>
+                <button class="sos-button" id="sosButton" onmousedown="startLongPress()" onmouseup="endLongPress()" ontouchstart="startLongPress()" ontouchend="endLongPress()">
+                    SOS
+                </button>
+                <div class="sos-text">Long press to activate</div>
+            </div>
+
+            <div class="alert-status" id="alertStatus" style="display: none;">
+                <h3>Active Alert</h3>
+                <div class="status-item">
+                    <span>Status</span>
+                    <span class="status-badge badge-active">ACTIVE</span>
+                </div>
+                <div class="status-item">
+                    <span>Duration</span>
+                    <span class="status-value" id="alertDuration">0m 0s</span>
+                </div>
+                <div class="status-item">
+                    <span>Location Updates</span>
+                    <span class="status-value" id="locationCount">0</span>
+                </div>
+                <div class="status-item">
+                    <span>Contacts Notified</span>
+                    <span class="status-value" id="contactCount">0</span>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="goToAlert()">View Alert Details</button>
+            <button class="btn btn-secondary" onclick="logout()">Sign Out</button>
+        </div>
+
+        <!-- Alert Details Screen -->
+        <div class="screen" id="alertScreen">
+            <h2>🚨 Emergency Alert Active</h2>
+
+            <div class="detail-card">
+                <h4>Alert ID</h4>
+                <p id="alertId"></p>
+            </div>
+
+            <div class="detail-card">
+                <h4>Status</h4>
+                <p><span class="status-badge badge-active">ACTIVE</span></p>
+            </div>
+
+            <div class="detail-card">
+                <h4>Time Elapsed</h4>
+                <p id="alertTime"></p>
+            </div>
+
+            <div class="detail-card">
+                <h4>Current Location</h4>
+                <p id="currentLocation"></p>
+            </div>
+
+            <div class="detail-card">
+                <h4>Contacts Notified</h4>
+                <div class="contacts-list" id="contactsList">
+                    <div class="contact-item">Emergency Services - 911</div>
+                    <div class="contact-item">Mom - +91 9999999999</div>
+                    <div class="contact-item">Dad - +91 8888888888</div>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <h4>Location History (Last 5)</h4>
+                <div class="location-log" id="locationHistory"></div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-small" onclick="stopAlert()">Stop Alert</button>
+                <button class="btn btn-small btn-secondary" onclick="goHome()">Back Home</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h2>⚠️ CONFIRM EMERGENCY</h2>
+            <p>Are you sure you want to trigger an emergency alert?</p>
+            <p style="font-size: 12px; color: #ff4757;">This will notify emergency services and your contacts.</p>
+            <div class="modal-buttons">
+                <button class="modal-buttons button btn-cancel" onclick="cancelAlert()">Cancel</button>
+                <button class="modal-buttons button btn-confirm" onclick="confirmAlert()">YES, EMERGENCY</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isLongPressingAlert = false;
+        let longPressTimer = null;
+        let longPressDuration = 0;
+        let longPressStartTime = 0;
+        let alertActive = false;
+        let alertStartTime = null;
+        let locationUpdateInterval = null;
+        let alertUpdateInterval = null;
+        let currentUser = null;
+
+        // Mock data
+        const mockContacts = [
+            { id: 1, name: 'Emergency Services', phone: '911' },
+            { id: 2, name: 'Mom', phone: '+91 9999999999' },
+            { id: 3, name: 'Dad', phone: '+91 8888888888' }
+        ];
+
+        const mockLocations = [
+            { lat: 28.6139, lng: 77.2090, accuracy: '±10m', time: '0m 0s' },
+            { lat: 28.6145, lng: 77.2095, accuracy: '±12m', time: '0m 5s' },
+            { lat: 28.6151, lng: 77.2100, accuracy: '±8m', time: '0m 10s' },
+            { lat: 28.6157, lng: 77.2105, accuracy: '±11m', time: '0m 15s' },
+            { lat: 28.6163, lng: 77.2110, accuracy: '±9m', time: '0m 20s' }
+        ];
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function login() {
+            const phone = document.getElementById('phoneInput').value;
+            if (!phone) {
+                alert('Please enter a phone number');
+                return;
+            }
+            currentUser = { phone, id: 'user_' + Date.now() };
+            document.getElementById('userPhone').textContent = phone;
+            showScreen('homeScreen');
+        }
+
+        function logout() {
+            if (alertActive) {
+                stopAlert();
+            }
+            currentUser = null;
+            document.getElementById('phoneInput').value = '';
+            showScreen('authScreen');
+        }
+
+        function startLongPress() {
+            if (alertActive) return;
+            isLongPressingAlert = true;
+            longPressStartTime = Date.now();
+            const sosBtn = document.getElementById('sosButton');
+
+            longPressTimer = setInterval(() => {
+                longPressDuration = Date.now() - longPressStartTime;
+                if (longPressDuration >= 1000) {
+                    clearInterval(longPressTimer);
+                    isLongPressingAlert = false;
+                    openConfirmDialog();
+                }
+            }, 50);
+        }
+
+        function endLongPress() {
+            clearInterval(longPressTimer);
+            isLongPressingAlert = false;
+            longPressDuration = 0;
+        }
+
+        function openConfirmDialog() {
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function cancelAlert() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        function confirmAlert() {
+            document.getElementById('confirmModal').classList.remove('active');
+            triggerAlert();
+        }
+
+        function triggerAlert() {
+            alertActive = true;
+            alertStartTime = Date.now();
+            const sosBtn = document.getElementById('sosButton');
+            sosBtn.classList.add('pressed');
+            sosBtn.disabled = true;
+
+            // Show alert status
+            document.getElementById('alertStatus').style.display = 'block';
+
+            // Generate alert ID
+            const alertId = 'ALERT_' + Date.now();
+            document.getElementById('alertId').textContent = alertId;
+
+            // Start updating UI
+            startAlertUpdates();
+            startLocationUpdates();
+        }
+
+        function startAlertUpdates() {
+            alertUpdateInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - alertStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+
+                document.getElementById('alertDuration').textContent =
+                    `${minutes}m ${seconds}s`;
+                document.getElementById('alertTime').textContent =
+                    `${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`;
+
+                // Simulate more contacts being notified over time
+                const notifiedCount = Math.min(3, Math.floor(elapsed / 5) + 1);
+                document.getElementById('contactCount').textContent = notifiedCount;
+            }, 500);
+        }
+
+        function startLocationUpdates() {
+            let locIndex = 0;
+            locationUpdateInterval = setInterval(() => {
+                if (locIndex < mockLocations.length) {
+                    const loc = mockLocations[locIndex];
+                    const elapsed = Math.floor((Date.now() - alertStartTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+
+                    document.getElementById('currentLocation').textContent =
+                        `Lat: ${loc.lat}, Lng: ${loc.lng} ${loc.accuracy}`;
+
+                    document.getElementById('locationCount').textContent = locIndex + 1;
+
+                    locIndex++;
+                }
+
+                // Update location history
+                updateLocationHistory();
+            }, 5000);
+        }
+
+        function updateLocationHistory() {
+            const elapsed = Math.floor((Date.now() - alertStartTime) / 1000);
+            const displayed = Math.min(5, Math.ceil(elapsed / 5));
+
+            let html = '';
+            for (let i = 0; i < displayed && i < mockLocations.length; i++) {
+                const loc = mockLocations[i];
+                html += `<div class="location-item">🗺️ ${loc.lat}, ${loc.lng}</div>`;
+            }
+            document.getElementById('locationHistory').innerHTML = html;
+        }
+
+        function stopAlert() {
+            alertActive = false;
+            const sosBtn = document.getElementById('sosButton');
+            sosBtn.classList.remove('pressed');
+            sosBtn.disabled = false;
+            document.getElementById('alertStatus').style.display = 'none';
+            clearInterval(alertUpdateInterval);
+            clearInterval(locationUpdateInterval);
+            goHome();
+        }
+
+        function goToAlert() {
+            if (!alertActive) {
+                alert('No active alert');
+                return;
+            }
+            showScreen('alertScreen');
+        }
+
+        function goHome() {
+            showScreen('homeScreen');
+        }
+    </script>
+</body>
+</html>
