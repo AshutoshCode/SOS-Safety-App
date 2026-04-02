@@ -1,11 +1,36 @@
 import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { Geolocation } from '@capacitor/geolocation';
 import { Shield, MapPin, Bell, Users, History, Settings, LogOut } from 'lucide-react';
+import L from 'leaflet';
 import './App.css';
+
+// Fix for Leaflet default icon issues in React
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Helper component to update map center
+function ChangeView({ center, zoom }) {
+  const map = useMap();
+  map.setView(center, zoom);
+  return null;
+}
 
 function App() {
   const [isEmergency, setIsEmergency] = useState(false);
   const [timer, setTimer] = useState(0);
+  const [position, setPosition] = useState([28.6139, 77.2090]); // Default to Delhi
+  const [locationName, setLocationName] = useState('Detecting...');
 
+  // Effect for Timer
   useEffect(() => {
     let interval;
     if (isEmergency) {
@@ -16,6 +41,42 @@ function App() {
     }
     return () => clearInterval(interval);
   }, [isEmergency]);
+
+  // Effect for Live Location
+  useEffect(() => {
+    const watchId = Geolocation.watchPosition({
+      enableHighAccuracy: true,
+      timeout: 10000
+    }, (pos, err) => {
+      if (pos) {
+        const { latitude, longitude } = pos.coords;
+        setPosition([latitude, longitude]);
+        setLocationName(`${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`);
+      }
+    });
+
+    return () => {
+      if (watchId) Geolocation.clearWatch({ id: watchId });
+    };
+  }, []);
+
+  const triggerSOS = async () => {
+    const newState = !isEmergency;
+    setIsEmergency(newState);
+
+    if (newState) {
+      // 1. Get current position
+      const coordinates = await Geolocation.getCurrentPosition();
+      const { latitude, longitude } = coordinates.coords;
+      
+      // 2. Prepare SMS Intent (Native Intent)
+      const message = `EMERGENCY SOS! I need help. My location: https://www.google.com/maps?q=${latitude},${longitude}`;
+      const phoneNumber = "9876543210"; // Replace with actual contact
+      
+      // Open SMS App
+      window.location.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
+    }
+  };
 
   const formatTime = (s) => {
     const mins = Math.floor(s / 60);
@@ -35,9 +96,8 @@ function App() {
 
         <section className="sos-section">
           <button 
-            className="sos-trigger"
-            onHold={() => setIsEmergency(true)} // Simulated hold
-            onClick={() => setIsEmergency(!isEmergency)}
+            className={`sos-trigger ${isEmergency ? 'active' : ''}`}
+            onClick={triggerSOS}
           >
             {isEmergency ? 'STOP' : 'SOS'}
           </button>
@@ -50,11 +110,25 @@ function App() {
           </div>
         </section>
 
-        <section className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '2rem' }}>
-          <div className="glass-card">
-            <div style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}><MapPin size={24} /></div>
-            <h3>Live Location</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>28.6139° N, 77.2090° E</p>
+        <section className="dashboard-grid">
+          <div className="glass-card map-card">
+            <div className="card-header">
+              <div style={{ color: 'var(--primary)' }}><MapPin size={24} /></div>
+              <h3>Live Location</h3>
+            </div>
+            <div className="mini-map-container">
+              <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '180px', width: '100%', borderRadius: '12px' }}>
+                <ChangeView center={position} zoom={13} />
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={position}>
+                  <Popup>User is here</Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+            <p className="location-name">{locationName}</p>
           </div>
           <div className="glass-card">
             <div style={{ color: 'var(--secondary)', marginBottom: '0.5rem' }}><Users size={24} /></div>
