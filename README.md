@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/images/hero.jpg" alt="Guardian SOS App Preview" width="300" />
+  <img src="./assets/images/hero.jpeg" alt="Guardian SOS App Preview" width="300" />
 
   # Guardian SOS
   **Elite Personal Safety & Emergency Response System**
