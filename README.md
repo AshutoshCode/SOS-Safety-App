@@ -1,50 +1,48 @@
-# Welcome to your Expo app 👋
+# Guardian SOS - Elite Personal Safety System 🛡️🆘
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Guardian SOS is a mission-critical, "Panic-Proof" emergency response application built with **React Native (Expo)** and **Firebase**. It provides a one-touch, high-reliability safety net for individuals in high-stress situations.
 
-## Get started
+## 🚀 Ready-to-Run Features
 
-1. Install dependencies
+*   **SOS Trigger (Long-Press)**: Prevents accidental activations while ensuring immediate response. Includes **Haptic Feedback** for eyes-free confirmation.
+*   **Live GPS Intelligence**: Captures and synchronizes real-time location data with the cloud every 10 meters.
+*   **Emergency Contacts (Protectors)**: Secure, user-specific management of personal emergency responders in a live Firestore database.
+*   **Automated SMS Rescue**: Automatically generates emergency messages to all "Protectors" with a direct Google Maps link.
+*   **Alert History**: Maintains a complete, secure log of all SOS activations with precise timestamps and coordinates.
+*   **Premium Aesthetics**: High-contrast dark mode design with sleek glassmorphism components for optimal readability in low light.
 
-   ```bash
-   npm install
-   ```
+## 🛠️ Technical Stack
 
-2. Start the app
+*   **Framework**: React Native (Expo SDK 54)
+*   **Backend**: Firebase Firestore (NoSQL Database), Firebase Authentication
+*   **Navigation**: Expo Router (v3)
+*   **Components**: Lucide-React-Native Icons, React Native Safe Area Context
+*   **Persistence**: @react-native-async-storage/async-storage
 
-   ```bash
-   npx expo start
-   ```
+## 📦 Get Started
 
-In the output, you'll find options to open the app in a
+1.  **Clone & Install**:
+    ```bash
+    git clone https://github.com/AditiBharal/SOS-Safety-App.git
+    npm install
+    ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+2.  **Start the Project**:
+    ```bash
+    # For local same-network testing
+    npx expo start
+    
+    # For remote/off-site testing
+    npx expo start --tunnel
+    ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+3.  **Test on Device**:
+    Download the **Expo Go** app from the Play Store or App Store and scan the QR code.
 
-## Get a fresh project
+## 🛡️ Security & Privacy
+*   All user data is isolated via **Firebase Security Rules**.
+*   Emergency alerts are private and accessible only to the authenticated user and their rescue logs.
+*   The system is designed for **100% session persistence** to ensure you stay protected even after unexpected reboots.
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+*Created for Guardian SOS - 24/7 Elite Personal Protection.*
