@@ -23,7 +23,7 @@ Guardian SOS is a mission-critical, "Panic-Proof" emergency response application
 
 1.  **Clone & Install**:
     ```bash
-    git clone https://github.com/AditiBharal/SOS-Safety-App.git
+    git clone https://github.com/AshutoshCode/SOS-Safety-App.git
     npm install
     ```
 
